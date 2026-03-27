@@ -20,8 +20,7 @@ Thumbs.db
 # Logs
 *.log
 
-# Local database / data artifacts
-database.db
+# Local data artifacts
 *.db-shm
 *.db-wal
 
