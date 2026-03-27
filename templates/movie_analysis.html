@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>腾讯视频影视作品数据分析系统</title>
+    
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/movie_analysis.css') }}">
+    
+    <!-- 引入Chart.js图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 左侧功能菜单 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>功能菜单</h3>
+            </div>
+            
+            <nav class="sidebar-navigation">
+                <ul class="sidebar-menu">
+                    <li class="menu-item {% if feature_name == 'sentiment' %}active{% endif %}">
+                        <a href="/dashboard?feature=sentiment">评论数据情感分析</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="/topic_analysis">评论主题分析</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="/chart_analysis">评论时间段可视化</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="/character_analysis">演员导演类型分析</a>
+                    </li>
+                    <li class="menu-item {% if feature_name == 'movie_analysis' %}active{% endif %}">
+                        <a href="/movie_analysis">电影数据分析</a>
+                    </li>
+                    <li class="menu-item {% if feature_name == 'settings' %}active{% endif %}">
+                        <a href="/dashboard?feature=settings">个人设置</a>
+                    </li>
+
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="dashboard-content">
+            <!-- 顶部导航栏 -->
+            <header class="top-nav">
+                <h1 class="system-title">腾讯视频影视作品数据分析系统</h1>
+                <div class="user-info">
+                    <span>欢迎 {{ session['username'] }}！</span>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </header>
+            
+            <!-- 功能内容区域 -->
+            <section class="data-table-container">
+                <!-- 功能标题 -->
+                <h2 class="section-title">{{ feature_title }}</h2>
+                
+                <!-- 错误提示信息 -->
+                {% if error %}
+                <div class="alert alert-error">
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                <!-- 图表展示区域 -->
+                <div class="charts-container">
+                    <!-- 语言分布饼图 -->
+                    <div class="chart-section">
+                        <h3 class="chart-title">电影语言分布{% if not show_all_languages %}（前15条）{% endif %}</h3>
+                        <div class="chart-container">
+                            <canvas id="languagesChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- 地区分布条形图 -->
+                    <div class="chart-section">
+                        <h3 class="chart-title">电影地区分布{% if not show_all_regions %}（前15条）{% endif %}</h3>
+                        <div class="chart-container">
+                            <canvas id="regionsChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- 年份分布柱形图 -->
+                    <div class="chart-section">
+                        <h3 class="chart-title">电影年份分布</h3>
+                        <div class="chart-container">
+                            <canvas id="yearsChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- 电影评分与电影时长关系散点图 -->
+                    <div class="chart-section">
+                        <h3 class="chart-title">电影评分与电影时长关系</h3>
+                        <div class="chart-container">
+                            <canvas id="scoreDurationChart"></canvas>
+                        </div>
+                        
+                        <!-- 评分与时长深入分析 -->
+                        <div class="analysis-section">
+                            <h4 class="analysis-title">深入分析</h4>
+                            
+                            <div class="analysis-content">
+                                <!-- 相关性系数 -->
+                                <div class="analysis-item">
+                                    <h5 class="analysis-subtitle">评分与时长相关性</h5>
+                                    <p>皮尔逊相关系数: <strong>{% if correlation is not none %}{{ correlation }}{% else %}0{% endif %}</strong></p>
+                                    <p class="analysis-desc">
+                                        {% if correlation is not none %}
+                                            {% if correlation > 0.3 %}
+                                                评分与时长呈弱正相关，较长的电影可能获得略高的评分。
+                                            {% elif correlation < -0.3 %}
+                                                评分与时长呈弱负相关，较短的电影可能获得略高的评分。
+                                            {% else %}
+                                                评分与时长之间相关性较弱，时长对评分影响不明显。
+                                            {% endif %}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                
+                                <!-- 时长区间统计 -->
+                                <div class="analysis-item">
+                                    <h5 class="analysis-subtitle">不同时长区间的平均评分</h5>
+                                    <canvas id="durationBucketsChart" style="height: 250px;"></canvas>
+                                </div>
+                                
+                                <!-- 异常值 -->
+                                {% if outliers and outliers|length > 0 %}
+                                <div class="analysis-item">
+                                    <h5 class="analysis-subtitle">异常值分析</h5>
+                                    <p>发现 {{ outliers|length }} 部异常值电影（评分与平均水平差异较大）：</p>
+                                    <div class="outliers-list">
+                                        {% for outlier in outliers[:10] %} <!-- 只显示前10个 -->
+                                        <div class="outlier-item">
+                                            <span class="outlier-name">{{ outlier.name }}</span>
+                                            <span class="outlier-score">评分: {{ outlier.score }}</span>
+                                            <span class="outlier-duration">时长: {{ outlier.duration }}分钟</span>
+                                        </div>
+                                        {% endfor %}
+                                        {% if outliers|length > 10 %}
+                                        <p class="outlier-more">还有 {{ outliers|length - 10 }} 部异常值电影...</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 电影评分与电影类型关系柱状图 -->
+                    <div class="chart-section">
+                        <h3 class="chart-title">电影评分与电影类型关系</h3>
+                        <div class="chart-container">
+                            <canvas id="genresScoreChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- 按类型筛选的评分散点图 -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3 class="chart-title">特定类型电影评分分布</h3>
+                            <div class="genre-select-form">
+                                <select id="genreSelect" name="selected_genre">
+                                    <option value="">选择电影类型</option>
+                                    {% for genre in genres_labels %}
+                                        <option value="{{ genre }}" {% if selected_genre == genre %}selected{% endif %}>{{ genre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="genreRatingsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- 图表数据全局变量 -->
+    <script>
+        // 定义图表所需的全局数据变量
+        window.chartData = {
+            languages: {
+                labels: {{ languages_labels|tojson|safe }},
+                data: {{ languages_data|tojson|safe }}
+            },
+            regions: {
+                labels: {{ regions_labels|tojson|safe }},
+                data: {{ regions_data|tojson|safe }}
+            },
+            years: {
+                labels: {{ years_labels|tojson|safe }},
+                data: {{ years_data|tojson|safe }}
+            },
+            scoreDuration: {
+                points: {{ score_duration_points|tojson|safe }},
+                correlation: {{ correlation|tojson|safe }},
+                trendLine: {{ trend_line|tojson|safe }},
+                outliers: {{ outliers|tojson|safe }}
+            },
+            durationBuckets: {{ duration_buckets|tojson|safe }},
+            genresScore: {
+                labels: {{ genres_labels|tojson|safe }},
+                avgScores: {{ genres_avg_scores|tojson|safe }},
+                counts: {{ genres_counts|tojson|safe }}
+            },
+            genreRatings: {
+                points: {{ genre_ratings_points|tojson|safe }},
+                selectedGenre: {{ selected_genre|tojson|safe }}
+            }
+        };
+    </script>
+    
+    <!-- 引入电影分析专用的JavaScript文件 -->
+    <script src="{{ url_for('static', filename='js/movie_analysis.js') }}"></script>
+</body>
+</html>

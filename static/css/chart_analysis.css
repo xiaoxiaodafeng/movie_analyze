@@ -1,0 +1,161 @@
+/* 图表分析页面样式 */
+.chart-analysis-container {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 筛选条件样式 */
+.filter-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.filter-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+.filter-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-field select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* 图表容器样式 */
+.charts-grid {
+    margin-top: 30px;
+}
+
+#chartFilterForm {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+    gap: 30px;
+    width: 100%;
+}
+
+.chart-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 500px;
+}
+
+/* 为小时统计图表添加特殊样式 */
+.chart-container canvas {
+    max-height: 400px;
+}
+
+/* 针对小时时间段图表的特殊处理 */
+.chart-container:nth-child(3) canvas,
+.chart-container:nth-child(4) canvas {
+    min-height: 450px;
+}
+
+/* 图表内筛选器样式 */
+.chart-filter {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.inline-filter {
+    display: inline-block;
+}
+
+.inline-filter select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.chart-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* 新增样式 */
+.filter-hint {
+    font-size: 12px;
+    color: #666;
+    margin-left: 8px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.apply-btn {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.apply-btn:hover {
+    background-color: #0056b3;
+}
+
+.chart-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.chart-requirements {
+    font-size: 12px;
+    color: #666;
+    font-weight: normal;
+}
+
+.chart-description {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 4px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    #chartFilterForm {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-fields {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filter-buttons {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}

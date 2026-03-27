@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录注册</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <!-- 顶部标题栏 -->
+            <div class="auth-header">
+                <h1>用户注册</h1>
+                <div class="tab-buttons">
+                    <button class="tab-btn {% if active_tab == 'login' %}active{% endif %}" data-tab="login">登录</button>
+                    <button class="tab-btn {% if active_tab == 'register' %}active{% endif %}" data-tab="register">注册</button>
+                </div>
+            </div>
+
+            <!-- 登录表单 -->
+            <div class="tab-content {% if active_tab == 'login' %}active{% endif %}" id="login">
+                <form id="loginForm" action="/login" method="POST">
+                    {% if error %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endif %}
+                    {% if success %}
+                        <div class="success-message">{{ success }}</div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        <label for="loginUsername">账号</label>
+                        <input type="text" id="loginUsername" name="username" placeholder="请输入账号" required value="{{ username or '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">密码</label>
+                        <input type="password" id="loginPassword" name="password" placeholder="请输入密码" required>
+                    </div>
+                    
+                    <div class="form-group captcha-group">
+                        <label for="loginCaptcha">验证码</label>
+                        <div class="captcha-input-container">
+                            <input type="text" id="loginCaptcha" name="captcha" placeholder="请输入验证码" required maxlength="4">
+                            <div class="captcha-image-container">
+                                <canvas id="loginCaptchaCanvas" width="120" height="40"></canvas>
+                                <button type="button" class="refresh-captcha" id="refreshLoginCaptcha">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 2v6h-6M3 22v-6h6M21 12A9 9 0 0 0 6.5 6.2"></path>
+                                        <path d="M3 12a9 9 0 0 0 18 0"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" name="remember"> 记住我
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="auth-btn">登录</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 注册表单 -->
+            <div class="tab-content {% if active_tab == 'register' %}active{% endif %}" id="register">
+                <form id="registerForm" action="/register" method="POST">
+                    {% if error %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endif %}
+                    {% if success %}
+                        <div class="success-message">{{ success }}</div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        <label for="registerUsername">账号</label>
+                        <input type="text" id="registerUsername" name="username" placeholder="请设置账号" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerPassword">密码</label>
+                        <input type="password" id="registerPassword" name="password" placeholder="请设置密码" required minlength="4">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerConfirmPassword">确认密码</label>
+                        <input type="password" id="registerConfirmPassword" name="confirm_password" placeholder="请再次输入密码" required minlength="4">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerEmail">邮箱</label>
+                        <input type="email" id="registerEmail" name="email" placeholder="请输入邮箱" required>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="terms">
+                            <input type="checkbox" name="terms" required> 我同意服务条款和隐私政策
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="auth-btn">注册</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 自定义提示框 -->
+    <div id="customAlert" class="custom-alert">
+        <div class="alert-content">
+            <div class="alert-header">
+                <h3 id="alertTitle">提示</h3>
+                <button class="alert-close" id="alertClose">&times;</button>
+            </div>
+            <div class="alert-body">
+                <p id="alertMessage"></p>
+            </div>
+            <div class="alert-footer">
+                <button class="alert-btn" id="alertConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

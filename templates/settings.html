@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人设置</title>
+    <link rel="stylesheet" href="/static/css/settings.css">
+</head>
+<body>
+    <div class="container">
+        <h1>个人设置</h1>
+        
+        <!-- 成功/错误提示 -->
+        {% if success %}
+        <div class="alert alert-success">
+            {{ success }}
+        </div>
+        {% endif %}
+        
+        {% if error %}
+        <div class="alert alert-error">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <!-- 用户信息 -->
+        <div class="user-info">
+            <h2>用户信息</h2>
+            <div class="info-item">
+                <label>用户名：</label>
+                <span>{{ username }}</span>
+            </div>
+            <div class="info-item">
+                <label>当前邮箱：</label>
+                <span>{{ email }}</span>
+            </div>
+        </div>
+        
+        <!-- 修改密码表单 -->
+        <div class="form-container">
+            <h2>修改密码</h2>
+            <form id="changePasswordForm" method="POST" action="/settings">
+                <div class="form-group">
+                    <label for="new_password">新密码：</label>
+                    <input type="password" id="new_password" name="new_password" required minlength="6" placeholder="请输入新密码">
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">确认新密码：</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required minlength="6" placeholder="请再次输入新密码">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">修改密码</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 修改邮箱表单 -->
+        <div class="form-container">
+            <h2>修改邮箱</h2>
+            <form id="changeEmailForm" method="POST" action="/settings">
+                <div class="form-group">
+                    <label for="new_email">新邮箱：</label>
+                    <input type="email" id="new_email" name="new_email" required placeholder="请输入新邮箱地址">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">修改邮箱</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 返回按钮 -->
+        <div class="back-link">
+            <a href="/dashboard" class="btn btn-secondary">返回首页</a>
+        </div>
+    </div>
+    
+    <!-- 引入JS文件 -->
+    <script src="/static/js/settings.js"></script>
+</body>
+</html>

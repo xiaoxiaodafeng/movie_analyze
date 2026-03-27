@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>腾讯视频影视作品数据分析系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/topic_analysis.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 左侧功能栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>功能菜单</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="/dashboard">评论数据情感分析</a>
+                </li>
+                <li class="menu-item active">
+                    <a href="/topic_analysis">评论主题分析</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/chart_analysis">评论时间段可视化</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/character_analysis">演员导演类型分析</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/movie_analysis">电影数据分析</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/dashboard?feature=settings">个人设置</a>
+                </li>
+              
+            </ul>
+        </div>
+        
+        <!-- 主内容区域 -->
+        <div class="dashboard-content">
+            <!-- 顶部导航栏 -->
+            <div class="top-nav">
+                <h1 class="system-title">腾讯视频影视作品数据分析系统</h1>
+                <div class="user-info">
+                    <span>欢迎 {{ session['username'] }}！</span>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+            
+            <!-- 主题分析区域 -->
+            <div class="topic-analysis-container">
+                <div class="topic-header">
+                    <h2>评论主题分析</h2>
+                </div>
+                
+                <!-- 查询功能区域 -->
+                <div class="search-container">
+                    <form id="searchForm" method="POST" action="/topic_analysis">
+                        <div class="search-fields">
+                            <div class="search-field">
+                                <label for="movieName">电影名称：</label>
+                                <div class="autocomplete">
+                                    <input type="text" id="movieName" name="movie_name" placeholder="请输入电影名称" value="{{ request.form.get('movie_name', '') }}">
+                                    <div id="suggestions" class="autocomplete-suggestions"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="search-actions">
+                            <button type="submit" class="search-btn">分析评论</button>
+                            <button type="button" class="reset-btn" onclick="resetSearch()">重置</button>
+                        </div>
+                    </form>
+                </div>
+                
+                {% if lda_result %}
+                <!-- 分析统计信息 -->
+                <div class="analysis-stats">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ lda_result.num_topics }}</div>
+                        <div class="stat-label">主题数量</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ lda_result.num_documents }}</div>
+                        <div class="stat-label">分析文档数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ lda_result.vocab_size }}</div>
+                        <div class="stat-label">词汇表大小</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ "%.4f"|format(lda_result.perplexity) }}</div>
+                        <div class="stat-label">困惑度 (Perplexity)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ "%.4f"|format(lda_result.coherence_score) }}</div>
+                        <div class="stat-label">连贯性 (Coherence)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ "%.4f"|format(lda_result.diversity) }}</div>
+                        <div class="stat-label">主题多样性</div>
+                    </div>
+                </div>
+                
+                <!-- 主题列表 -->
+                <div class="topic-grid">
+                    {% for i in range(lda_result.topics|length) %}
+                    {% set topic = lda_result.topics[i] %}
+                    <div class="topic-card">
+                        <div class="topic-title">主题 {{ i + 1 }}</div>
+                        <ul class="topic-words">
+                            {% for word in topic.words %}
+                            <li class="topic-word-item">
+                                <span class="topic-word">{{ word.word }}</span>
+                                <span class="topic-weight">{{ "%.4f"|format(word.weight) }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- 主题分布图表 -->
+                <div class="chart-container">
+                    <h3>主题分布</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="topicDistributionChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 加权词云 -->
+                <div class="word-cloud-container">
+                    <h3>加权词云</h3>
+                    <div class="word-cloud">
+                        {% for word in lda_result.word_cloud_data %}
+                        <span class="word-cloud-item" style="font-size: {{ word.size }}px;">{{ word.word }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- 自定义提示框 -->
+    <div id="customAlert" class="custom-alert">
+        <div class="alert-content">
+            <div class="alert-header">
+                <h3 id="alertTitle">提示</h3>
+                <button class="alert-close" id="alertClose">&times;</button>
+            </div>
+            <div class="alert-body">
+                <p id="alertMessage"></p>
+            </div>
+            <div class="alert-footer">
+                <button class="alert-btn" id="alertConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 配置全局变量 -->
+    <script>
+        // 设置全局变量，供外部JavaScript使用
+        window.alertConfig = {{ alert|tojson|safe if alert else '{}' }};
+        window.ldaData = {{ lda_result|tojson|safe if lda_result else 'null' }};
+    </script>
+    
+    <!-- 引入外部JavaScript文件 -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/topic_analysis.js') }}"></script>
+</body>
+</html>

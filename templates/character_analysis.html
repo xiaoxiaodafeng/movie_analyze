@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>腾讯视频影视作品数据分析系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/character_analysis.css') }}">
+    <!-- 引入Chart.js库用于图表绘制 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="character_analysis">
+    <div class="dashboard-container">
+        <!-- 左侧功能栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>功能菜单</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="/dashboard">评论数据情感分析</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/topic_analysis">评论主题分析</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/chart_analysis">评论时间段可视化</a>
+                </li>
+                <li class="menu-item active">
+                    <a href="/character_analysis">演员导演类型分析</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/movie_analysis">电影数据分析</a>
+                </li>
+                <li class="menu-item">
+                    <a href="/dashboard?feature=settings">个人设置</a>
+                </li>
+              
+            </ul>
+        </div>
+        
+        <!-- 主内容区域 -->
+        <div class="dashboard-content">
+            <!-- 顶部导航栏 -->
+            <div class="top-nav">
+                <h1 class="system-title">腾讯视频影视作品数据分析系统</h1>
+                <div class="user-info">
+                    <span>欢迎 {{ session['username'] }}！</span>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+            
+            <!-- 数据表格展示区域 -->
+            <div class="data-table-container">
+                <h2>演员导演类型分析</h2>
+                
+                <!-- 查询功能区域 -->
+                <div class="search-container">
+                    <form id="searchForm" method="POST" action="/character_analysis">
+                        <input type="hidden" id="pageInput" name="page" value="1">
+                        <input type="hidden" id="perPageInput" name="per_page" value="{{ per_page }}">
+                        
+                        <div class="search-fields">
+                            <div class="search-field">
+                                <label for="keyword">人物姓名：</label>
+                                <input type="text" id="keyword" name="keyword" placeholder="请输入人物姓名" value="{{ request.form.get('keyword', '') }}">
+                            </div>
+                        </div>
+                        <div class="search-actions">
+                            <button type="submit" class="search-btn">查询</button>
+                            <button type="button" class="reset-btn" onclick="resetSearch()">重置</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- 数据表格 -->
+                <div class="table-wrapper">
+                    {% if data %}
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                {% for col in column_names.keys() %}
+                                <th>{{ column_names[col] }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in data %}
+                            <tr onclick="showCharacterDetails({{ row['character_id'] }})" style="cursor: pointer;">
+                                {% for col in column_names.keys() %}
+                                <td>{{ row[col] }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="no-data">
+                        <p>暂无数据</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- 分页控制区域 -->
+                {% if total > 0 %}
+                <div class="pagination-container">
+                    <!-- 行数选择 -->
+                    <div class="pagination-options">
+                        <span>每页显示：</span>
+                        <select id="perPageSelect" onchange="changePerPage()">
+                            <option value="10" {% if per_page == 10 %}selected{% endif %}>10行</option>
+                            <option value="15" {% if per_page == 15 %}selected{% endif %}>15行</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 分页导航 -->
+                    <div class="pagination-nav">
+                        <form id="pageForm" method="POST" action="/character_analysis">
+                            <input type="hidden" id="pageInput" name="page" value="{{ page }}">
+                            <input type="hidden" id="perPageInput" name="per_page" value="{{ per_page }}">
+                            <input type="hidden" id="keywordInput" name="keyword" value="{{ request.form.get('keyword', '') }}">
+                            <button type="submit" class="pagination-btn" {% if page == 1 %}disabled{% endif %} name="direction" value="prev">
+                                上一页
+                            </button>
+                            <span class="page-info">
+                                第 {{ page }}/{{ total_pages }} 页，共 {{ total }} 条记录
+                            </span>
+                            <button type="submit" class="pagination-btn" {% if page == total_pages %}disabled{% endif %} name="direction" value="next">
+                                下一页
+                            </button>
+                            
+                            <!-- 页码输入框 -->
+                            <div class="page-jump">
+                                <span>跳转到：</span>
+                                <input type="number" class="page-input" id="jumpPage" name="jump_page" min="1" max="{{ total_pages }}" placeholder="页码">
+                                <button type="button" class="jump-btn" onclick="jumpToPage()">跳转</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- 配置全局变量 -->
+            <script>
+                // 设置全局变量，供外部JavaScript使用
+                window.totalPages = {{ total_pages }};
+                window.isSuccess = {{ success|tojson|safe }};
+                window.alertConfig = {{ alert|tojson|safe }};
+            </script>
+            
+            <!-- 引入外部JavaScript文件 -->
+            <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+        </div>
+    </div>
+    
+    <!-- 自定义提示框 -->
+    <div id="customAlert" class="custom-alert">
+        <div class="alert-content">
+            <div class="alert-header">
+                <h3 id="alertTitle">提示</h3>
+                <button class="alert-close" id="alertClose">&times;</button>
+            </div>
+            <div class="alert-body">
+                <p id="alertMessage"></p>
+            </div>
+            <div class="alert-footer">
+                <button class="alert-btn" id="alertConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+    
+<!-- 演员/导演详细信息弹出框 -->
+<div id="characterModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">演员/导演详细信息</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="characterDetails" class="character-details">
+                <!-- 演员基本信息将在这里动态加载 -->
+            </div>
+            <div class="charts-container">
+                <div class="chart-section">
+                    <h3>拍摄类型比例</h3>
+                    <canvas id="typeChart" width="400" height="400"></canvas>
+                </div>
+                <div class="chart-section">
+                    <h3>类型详情分析</h3>
+                    <canvas id="typeDetailsChart" width="600" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="close-btn">关闭</button>
+        </div>
+    </div>
+</div>
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/character_analysis.js') }}"></script>
+</body>
+</html>

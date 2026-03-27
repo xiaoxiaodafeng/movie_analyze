@@ -1,0 +1,501 @@
+/**
+ * 电影分析页面样式
+ */
+
+/* 侧边栏导航样式 */
+.sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    color: white;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #34495e;
+}
+
+.sidebar-header h3 {
+    font-size: 18px;
+    margin: 0;
+    color: #ecf0f1;
+}
+
+.sidebar-navigation {
+    padding: 0;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-item {
+    border-bottom: 1px solid #34495e;
+}
+
+.menu-item a {
+    display: block;
+    padding: 15px 20px;
+    color: #bdc3c7;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.menu-item a:hover {
+    background-color: #34495e;
+    color: white;
+    padding-left: 25px;
+}
+
+.menu-item.active a {
+    background-color: #3498db;
+    color: white;
+    border-left: 4px solid #2980b9;
+}
+
+/* 主内容区域样式 */
+.dashboard-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.dashboard-content {
+    background-color: white;
+    min-height: 100vh;
+    margin-left: 250px;
+    padding: 0;
+    width: calc(100% - 250px);
+    overflow-y: auto;
+}
+
+/* 顶部导航栏样式 */
+.top-nav {
+    background-color: #3498db;
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.system-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    color: white;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-info span {
+    font-size: 14px;
+    color: white;
+}
+
+/* 数据显示选项样式 */
+.chart-options {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px;
+}
+
+.options-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.form-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.form-option:hover {
+    background-color: #f5f5f5;
+}
+
+.form-option input[type="checkbox"] {
+    accent-color: #667eea;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.form-option label {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+}
+
+.apply-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: auto;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.apply-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.apply-btn:active {
+    transform: translateY(0);
+}
+
+/* 主图表容器 */
+.charts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 单个图表区域 */
+.chart-section {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+/* 图表标题 */
+.chart-title {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+/* 图表头部容器 */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* 年份显示选项表单 */
+.year-display-option {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* 年份显示选项表单中的复选框和标签 */
+.year-display-option .form-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.year-display-option .form-option:hover {
+    background-color: #f5f5f5;
+}
+
+.year-display-option .form-option input[type="checkbox"] {
+    accent-color: #667eea;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.year-display-option .form-option label {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+}
+
+/* 类型选择表单样式 */
+.genre-select-form {
+    display: flex;
+    align-items: center;
+}
+
+/* 类型选择下拉框样式 */
+.genre-select-form select {
+    background-color: white;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 35px;
+    min-width: 180px;
+}
+
+.genre-select-form select:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.genre-select-form select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.genre-select-form select option {
+    padding: 10px;
+    font-size: 14px;
+    color: #333;
+    background-color: white;
+}
+
+.genre-select-form select option:hover {
+    background-color: #f5f5f5;
+}
+
+/* 图表画布容器 */
+.chart-container {
+    position: relative;
+    height: 400px;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+/* 图表画布 */
+#movieChart, #languagesChart, #regionsChart, #yearsChart {
+    max-width: 100%;
+    height: 100%;
+    margin: 0 auto;
+}
+
+/* 导航链接样式 */
+.chart-navigation {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.chart-navigation a {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.chart-navigation a:hover {
+    background-color: #0056b3;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+    .system-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+    
+    .dashboard-content {
+        margin-left: 200px;
+        width: calc(100% - 200px);
+    }
+    
+    .chart-container {
+        height: 300px;
+    }
+    
+    .chart-section {
+        padding: 10px;
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+    }
+}
+
+/* 分析部分样式 */
+.analysis-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.analysis-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #667eea;
+}
+
+.analysis-content {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.analysis-item {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.analysis-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 12px;
+}
+
+.analysis-item p {
+    margin-bottom: 10px;
+    line-height: 1.6;
+    color: #666;
+}
+
+.analysis-desc {
+    font-style: italic;
+    color: #777;
+    margin-top: 8px;
+}
+
+/* 异常值列表样式 */
+.outliers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+/* 时长区间图表样式 */
+#durationBucketsChart {
+    max-height: 250px;
+    width: 100%;
+    object-fit: contain;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    #durationBucketsChart {
+        max-height: 220px;
+    }
+}
+
+.outlier-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: white;
+    border-radius: 6px;
+    border-left: 4px solid #FFCE56;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.outlier-name {
+    font-weight: 600;
+    color: #333;
+    flex: 1;
+}
+
+.outlier-score {
+    color: #4CAF50;
+    font-weight: 600;
+    margin: 0 15px;
+}
+
+.outlier-duration {
+    color: #2196F3;
+    font-weight: 600;
+}
+
+.outlier-more {
+    font-size: 14px;
+    color: #888;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* 修复媒体查询结构，将这些样式移到正确的位置 */
+@media (max-width: 768px) {
+    .chart-navigation a {
+        display: block;
+        margin: 10px 0;
+    }
+    
+    .top-nav {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+    }
+    
+    .dashboard-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .dashboard-container {
+        flex-direction: column;
+    }
+    
+    .system-title {
+        font-size: 16px;
+    }
+}

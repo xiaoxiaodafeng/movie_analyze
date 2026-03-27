@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>评论时间段可视化</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chart_analysis.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/chart_analysis.js') }}"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>功能菜单</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="/dashboard">评论情感分析</a></li>
+                <li class="menu-item"><a href="/topic_analysis">评论主题分析</a></li>
+                <li class="menu-item active"><a href="/chart_analysis">评论时间段可视化</a></li>
+                <li class="menu-item"><a href="/character_analysis">演员导演类型分析</a></li>
+                <li class="menu-item"><a href="/movie_analysis">电影数据分析</a></li>
+                <li class="menu-item"><a href="/dashboard?feature=settings">个人设置</a></li>
+            </ul>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="top-nav">
+                <h1 class="system-title">腾讯视频影视作品数据分析系统</h1>
+                <div class="user-info">
+                    <span>欢迎 {{ session['username'] }}</span>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+
+            <div class="chart-analysis-container">
+                <h2>评论时间段可视化</h2>
+
+                <div class="charts-grid">
+                    <form id="chartFilterForm" method="POST" action="/chart_analysis">
+                        <input type="hidden" id="scrollTargetInput" name="scroll_target" value="{{ scroll_target or '' }}">
+
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <span>按年份评论时间段统计</span>
+                                <span class="chart-requirements">[无筛选条件]</span>
+                            </div>
+                            <canvas id="yearChart"></canvas>
+                            <div class="chart-description">显示每年的评论总量变化趋势</div>
+                        </div>
+
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <span>按月份评论时间段统计</span>
+                                <span class="chart-requirements">[仅年份筛选]</span>
+                            </div>
+                            <div class="chart-filter">
+                                <select name="month_year" data-scroll-target="monthChart">
+                                    <option value="">全部年份</option>
+                                    {% for year in all_years %}
+                                        <option value="{{ year }}" {% if month_year == year|string %}selected{% endif %}>{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <canvas id="monthChart"></canvas>
+                            <div class="chart-description">
+                                {% if month_year %}
+                                    显示 {{ month_year }} 年各月份评论数
+                                {% else %}
+                                    显示所有年份的月份评论数
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <span>按月小时评论时间段统计</span>
+                                <span class="chart-requirements">[需选择年份和月份]</span>
+                            </div>
+                            <div class="chart-filter">
+                                <select name="month_hour_year" data-scroll-target="monthHourChart">
+                                    <option value="">选择年份</option>
+                                    {% for year in all_years %}
+                                        <option value="{{ year }}" {% if month_hour_year == year %}selected{% endif %}>{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                                <select name="month_hour_month" data-scroll-target="monthHourChart">
+                                    <option value="">选择月份</option>
+                                    {% for month in all_months %}
+                                        <option value="{{ month }}" {% if month_hour_month == month %}selected{% endif %}>{{ month }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <canvas id="monthHourChart"></canvas>
+                            <div class="chart-description">
+                                {% if month_hour_year and month_hour_month %}
+                                    显示 {{ month_hour_year }} 年 {{ month_hour_month }} 月各小时段评论数
+                                {% else %}
+                                    请选择具体年份和月份查看数据
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <span>按年小时评论时间段统计</span>
+                                <span class="chart-requirements">[可选择年份]</span>
+                            </div>
+                            <div class="chart-filter">
+                                <select name="year_hour_year" data-scroll-target="yearHourChart">
+                                    <option value="">选择年份</option>
+                                    {% for year in all_years %}
+                                        <option value="{{ year }}" {% if year_hour_year == year %}selected{% endif %}>{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <canvas id="yearHourChart"></canvas>
+                            <div class="chart-description">
+                                {% if year_hour_year %}
+                                    显示 {{ year_hour_year }} 年所有月份各小时段评论总量
+                                {% else %}
+                                    请选择具体年份查看数据
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            const requestedTargetId = {{ (scroll_target or '')|tojson|safe }};
+            const rememberedTargetId = localStorage.getItem('visibleChartId');
+            const targetId = requestedTargetId || rememberedTargetId;
+            if (targetId) {
+                const chartElement = document.getElementById(targetId);
+                if (chartElement) {
+                    chartElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            initCharts(
+                {{ year_chart_data|tojson|safe }},
+                {{ month_chart_data|tojson|safe }},
+                {},
+                {},
+                {{ month_hour_chart_data|tojson|safe }},
+                {{ year_hour_chart_data|tojson|safe }}
+            );
+        };
+
+        window.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('chartFilterForm');
+            const scrollTargetInput = document.getElementById('scrollTargetInput');
+            const chartContainers = document.querySelectorAll('.chart-container');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    const canvasElement = entry.target.querySelector('canvas');
+                    if (canvasElement) {
+                        localStorage.setItem('visibleChartId', canvasElement.id);
+                    }
+                });
+            }, { threshold: 0.3, rootMargin: '0px' });
+
+            chartContainers.forEach((container) => observer.observe(container));
+
+            const selectElements = form.querySelectorAll('select');
+            selectElements.forEach((select) => {
+                select.addEventListener('change', () => {
+                    const targetId = select.getAttribute('data-scroll-target');
+                    if (targetId) {
+                        localStorage.setItem('visibleChartId', targetId);
+                        if (scrollTargetInput) {
+                            scrollTargetInput.value = targetId;
+                        }
+                    }
+                    form.submit();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
