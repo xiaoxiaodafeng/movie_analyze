@@ -1,4 +1,4 @@
-﻿# movie_analyze
+# movie_analyze
 
 Movie review and movie data analysis system (Flask + SQLite + Chart.js).
 
@@ -30,17 +30,10 @@ Open:
 
 - `http://127.0.0.1:5000`
 
-## 5. Optional env vars (sentiment model)
+## 5. Sentiment model
 
-- `SENTIMENT_MODEL_NAME`: model id or local model path
-- `SENTIMENT_PROXY`: proxy for model download (optional)
-
-PowerShell example:
-
-```powershell
-$env:SENTIMENT_PROXY="http://127.0.0.1:7890"
-python main.py
-```
+- Fixed model: `lxyuan/distilbert-base-multilingual-cased-sentiments-student`
+- Loaded with `local_files_only=True` (local cache/path only, no proxy needed)
 
 ## 6. Notes
 
